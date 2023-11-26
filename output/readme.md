@@ -1,4 +1,1 @@
-## The subtitles.json file is exported here.
-Note: this file will not work when uploading subtitles to a video on youtube, despite it being the format that they become stored in internally. In order to view the closed captions generated, a tool must capture the `youtube.com/api/timedtext` request and the client must inject the custom response of this json file. this technique is described in the README of [this repo](https://github.com/arcusmaximus/YTSubConverter) under `Testing on PC`, but their payload isn't json it is `.ytt`.
-
-I wanted to go into this relatively blind as to how colorful closed captions are actually made and this is the solution I ended up with. I'll prob research how to construct industry standard subtitles sometime later.
+## The subtitles.ytt file is exported here.

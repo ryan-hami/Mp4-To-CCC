@@ -1,34 +1,34 @@
 # Python code to convert an image to ASCII image. AI comment?
 import numpy as np
-import json
 
 from PIL import Image
 
-# subtitle file to export
-out = { "pens": [{}], "events": [] }
-
-# maps colors to its index in the pens list
-pen_map = { 16777215: 0 }
+events = []
+pens = [ "#FFFFFF" ]
+pen_map = { "#FFFFFF": 0 }
 
 def color_to_id(color):
     if color in pen_map: return pen_map[color]
 
     # tail of list
-    id = len(out["pens"])
+    id = len(pens)
 
     # map unique color to tail
     pen_map[color] = id
 
     # add new color as pen
-    out["pens"].append({ "fcForeColor": color })
+    pens.append(f'<pen id="{id}" fc="{color}"/>')
 
     return id
 
-# add caption segments for the given time slot
-def add(start_ms, duration_ms, segs): out["events"].append({ "tStartMs": start_ms, "dDurationMs": duration_ms, "segs": segs })
+# append a subtitle to the events list
+def add_event(start_ms, duration_ms, segs): events.append(f'<p t="{start_ms}" d="{duration_ms}">{segs}</p>')
 
-# export result
-def export(): open("output/subtitles.json", "w").write(json.dumps(out))
+# return a segment
+def segment(color, utf8_text): return f'<s p="{color_to_id(color)}">{utf8_text}</s>'
+
+# export the subtitles as .ytt
+def export(): open("output/subtitles.ytt", "w").write(f'<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><head>{"".join(pens[1:])}</head><body>{"".join(events)}</body></timedtext>')
 
 # 10 levels of grey
 gscale2 = '$8obdpq0Lun1+"`'
@@ -126,17 +126,16 @@ def convertImageToAscii(fileName, cols, scale):
             my = y1 + (y2 - y1) // 2
             pixel = pil_image.getpixel((mx, my))
 
-            # convert rgb into integer representation
-            r, g, b = pixel
-            color = r * 65536 + g * 256 + b
+            # convert rgb tuple to hex string
+            hex_string = '#{:02X}{:02X}{:02X}'.format(*pixel)
 
             # append segment as char and color
-            segs.append({ "utf8": gsval, "pPenId": color_to_id(color) })
+            segs.append(segment(hex_string, gsval))
         # end of line, append new line character
-        if (j != rows - 1): segs.append({ "utf8": "\n", "pPenId": 0 })
+        if (j != rows - 1): segs.append('&#xA;')
 
     # return txt image
-    return segs
+    return "".join(segs)
 
 # converts an image to colored ascii characters then adds event to result
 def convert(imgFile, frm, tfrm, clms):
@@ -160,4 +159,4 @@ def convert(imgFile, frm, tfrm, clms):
 		duration_ms = 33
 
 	segs = convertImageToAscii(imgFile, cols, scale)
-	add(frm, duration_ms, segs)
+	add_event(frm, duration_ms, segs)

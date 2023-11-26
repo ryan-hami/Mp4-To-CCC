@@ -1,9 +1,9 @@
 # Info
-This fork of [Mp4-To-Srt](https://github.com/Nachtwind1/Mp4-To-Srt) adds color from the video into the closed captions.
+Fork of [Mp4-To-Srt](https://github.com/Nachtwind1/Mp4-To-Srt). This adds color from the video into the closed captions.
 
-I am unfamiliar with the standard techniques for creating closed captions, so I just went to a [rainbow caption video](https://youtu.be/Cc2nkx77U24), opened the Network tab of Inspect, pulled the `youtube.com/api/timedtext` request, and wrote the script to construct a subtitle payload in that format.
+Originally I exported the closed captions as json because looking at how YouTube stores subtitles internally they are json files. Specifically I used this video as reference: [rainbow caption video](https://youtu.be/Cc2nkx77U24). You can get the subtitles by opening the Network tab of Inspect, and filtering for the `youtube.com/api/timedtext` request. Having done some research, they now export as `.ytt`, but it is a little buggier.
 
-To test the subtitles I used the popular strategy of capturing requests with Telerik Fiddler and overriding the response with my generated json caption file instead of the intended captions for any video.
+To test the subtitles I used the popular strategy of capturing requests with Telerik Fiddler and overriding the response with my generated caption file. This technique is described in the README of [this repo](https://github.com/arcusmaximus/YTSubConverter) under `Testing on PC`.
 
 The wobble video is a recording of the famous gif then I just used ffmpeg to crop it.
 
@@ -16,7 +16,7 @@ A Python Programm That Converts Mp4 files to Colored Closed Captions for YouTube
 
 ## Requirements
 
-python3, opencv-python, PIL, numpy
+python3, opencv-python, pillow, numpy
 
 ### How to install
 
@@ -28,7 +28,7 @@ if you have python setup do
 
 ## Example
 ```
-python3 main.py --file "./Bad Apple.mp4" --inputfps 30 --collums 40 --msoffset 0 --idoffset 0
+python3 main.py --file "./wobble.mp4" --inputfps 30 --collums 40 --msoffset 0 --idoffset 0
 ```
 ## What do The Arguments mean
 
