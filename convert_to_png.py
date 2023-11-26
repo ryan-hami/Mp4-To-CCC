@@ -1,8 +1,5 @@
 # Importing all necessary libraries 
-import cv2 
-import os 
-import threading
-import time
+import cv2
 
 def convert(vidfile, fpsdiv):
     # Read the video from specified path 
@@ -24,7 +21,6 @@ def convert(vidfile, fpsdiv):
         if ret: 
             # if video is still left continue creating images 
             name = './temp/vids/' + str(int(currentframe/fpsdiv)) + '.png'#converts 60 fps to 30 fps
-            print('Creating...' + name) 
 
             # writing the extracted images 
             cv2.imwrite(name,frame)

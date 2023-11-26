@@ -1,33 +1,37 @@
-# Python code to convert an image to ASCII image.
-import sys, random, argparse
+# Python code to convert an image to ASCII image. AI comment?
 import numpy as np
-import math
+import json
 
 from PIL import Image
 
+# subtitle file to export
+out = { "pens": [{}], "events": [] }
 
+# maps colors to its index in the pens list
+pen_map = { 16777215: 0 }
 
+def color_to_id(color):
+    if color in pen_map: return pen_map[color]
 
+    # tail of list
+    id = len(out["pens"])
+
+    # map unique color to tail
+    pen_map[color] = id
+
+    # add new color as pen
+    out["pens"].append({ "fcForeColor": color })
+
+    return id
+
+# add caption segments for the given time slot
+def add(start_ms, duration_ms, segs): out["events"].append({ "tStartMs": start_ms, "dDurationMs": duration_ms, "segs": segs })
+
+# export result
+def export(): open("output/subtitles.json", "w").write(json.dumps(out))
 
 # 10 levels of grey
 gscale2 = '$8obdpq0Lun1+"`'
-def id_to_time_format(id):
-    # Calculate hours, minutes, seconds, and milliseconds
-    hours = id // 3600000  # 1 hour = 3600 seconds * 1000 milliseconds
-    id %= 3600000
-    minutes = id // 60000  # 1 minute = 60 seconds * 1000 milliseconds
-    id %= 60000
-    seconds = id // 1000
-    milliseconds = id % 1000
-
-    # Format the time components as strings with leading zeros
-    time_format = f"{hours:02d}:{minutes:02d}:{seconds:02d},{milliseconds:03d}"
-
-    return time_format
-
-
-
-
 
 def getAverageL(image):
 
@@ -54,14 +58,16 @@ def convertImageToAscii(fileName, cols, scale):
     Given Image and dims (rows, cols) returns an m*n list of Images 
     """
     # declare globals
-    global gscale1, gscale2
+    global gscale2
+
+    pil_image = Image.open(fileName)
 
     # open image and convert to grayscale
-    image = Image.open(fileName).convert('L')
+    image = pil_image.convert('L')
 
     # store dimensions
     W, H = image.size[0], image.size[1]
-    print("input image dims: %d x %d" % (W, H))
+    #print("input image dims: %d x %d" % (W, H))
 
     # compute width of tile
     w = W / cols
@@ -72,8 +78,8 @@ def convertImageToAscii(fileName, cols, scale):
     # compute number of rows
     rows = int(H / h)
 
-    print("cols: %d, rows: %d" % (cols, rows))
-    print("tile dims: %d x %d" % (w, h))
+    #print("cols: %d, rows: %d" % (cols, rows))
+    #print("tile dims: %d x %d" % (w, h))
 
     # check if image size is too small
     if cols > W or rows > H:
@@ -81,8 +87,9 @@ def convertImageToAscii(fileName, cols, scale):
         exit(0)
 
     # ascii image is a list of character strings
-    aimg = []
+    segs = []
 
+    # j outer, i inner for loop ... you are a monster...
     # generate list of dimensions
     for j in range(rows):
         y1 = int(j * h)
@@ -92,11 +99,7 @@ def convertImageToAscii(fileName, cols, scale):
         if j == rows - 1:
             y2 = H
 
-        # append an empty string
-        aimg.append("")
-
         for i in range(cols):
-
             # crop image to tile
             x1 = int(i * w)
             x2 = int((i + 1) * w)
@@ -116,21 +119,27 @@ def convertImageToAscii(fileName, cols, scale):
             if gsval == '"':
                 gsval = '" '
             elif gsval == "`":
-                gsval = "` "   
-            # append ascii char to string
-            aimg[j] += gsval
+                gsval = "` "
+
+            # get center pixel of segment
+            mx = x1 + (x2 - x1) // 2
+            my = y1 + (y2 - y1) // 2
+            pixel = pil_image.getpixel((mx, my))
+
+            # convert rgb into integer representation
+            r, g, b = pixel
+            color = r * 65536 + g * 256 + b
+
+            # append segment as char and color
+            segs.append({ "utf8": gsval, "pPenId": color_to_id(color) })
+        # end of line, append new line character
+        if (j != rows - 1): segs.append({ "utf8": "\n", "pPenId": 0 })
 
     # return txt image
-    return aimg
+    return segs
 
-
-# main() function
-def convert(Fileimg, frm,id,tfrm,clms):
-	rtn = ""
-	
-
-	imgFile = Fileimg
-
+# converts an image to colored ascii characters then adds event to result
+def convert(imgFile, frm, tfrm, clms):
 	# set scale default as 0.43 which suits
 	# a Courier font
 	scale = 0.43
@@ -144,21 +153,11 @@ def convert(Fileimg, frm,id,tfrm,clms):
 	else:
 		print("ERROR"*1000)
 
-	print('generating ASCII art...')
-	# convert image to ascii txt
-	aimg = convertImageToAscii(imgFile, cols, scale)
-
-	
-	i = 0
-
 	if tfrm == 2:
-		frm = frm - 1
-		efrm = frm + 34
+		frm -= 1
+		duration_ms = 34
 	else:
-		efrm = frm + 33
-	rtn = f'{id+1}\n{id_to_time_format(frm)} --> {id_to_time_format(efrm)}'
-	for row in aimg:
-		rtn = rtn + "\n" +  row
+		duration_ms = 33
 
-	
-	return rtn
+	segs = convertImageToAscii(imgFile, cols, scale)
+	add(frm, duration_ms, segs)

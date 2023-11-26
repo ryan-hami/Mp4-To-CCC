@@ -2,10 +2,7 @@ import convert_to_ascii
 import convert_to_png
 import os
 import argparse
-#our subtitles string
-srt = ""
-parser = argparse.ArgumentParser(description="mp4 to srt")
-# add expected arguments
+parser = argparse.ArgumentParser(description="mp4 to youtube subtitle json")
 parser.add_argument('--file', dest='file', required=True)
 parser.add_argument('--inputfps', dest='fps', required=True)
 parser.add_argument('--collums', dest='collums', required=True)
@@ -30,8 +27,10 @@ else:
 
 
 fpsdiv = fps / 30
-#Janky Code
+
+#Janky Code - it's not that janky dw
 files = 0
+print("Extracting pngs from video . . .")
 if os.path.exists(file):
     convert_to_png.convert(file,fpsdiv)
 else:
@@ -42,7 +41,8 @@ while(True):
         files += 1
     else:
         break
-id = 0
+
+# idk wtf this is doing and i'm too tired to think about it
 if args.idoffset != "":
     idoffset = args.idoffset
 else:
@@ -51,10 +51,12 @@ if args.msoffset != "":
     milisecondsoffset = args.msoffset
 else:
     milisecondsoffset = 0
+
 frm = 1
+id = 0
 print('Generating Ascii art')
 for x in range(files):
-    srt = srt + "\n" + convert_to_ascii.convert(f'./temp/vids/{x}.png',int(id+int(milisecondsoffset)),int(x + int(idoffset)),frm,args.collums) + "\n"
+    convert_to_ascii.convert(f'./temp/vids/{x}.png', int(id+int(milisecondsoffset)), frm, args.collums)
     frm += 1
     # 33.333333 milliseconds would be a frame so every third frame we make it 34 ms (33+33+34=100)
     if frm == 3:
@@ -63,12 +65,9 @@ for x in range(files):
         id += 34
     else:
         id += 33
+
 #write to file
-open("output/subtitles.srt","w").write(srt)
-
-
-
-
+convert_to_ascii.export()
 
 #remove all temporary files
 id = 0
