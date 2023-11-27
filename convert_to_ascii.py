@@ -138,25 +138,10 @@ def convertImageToAscii(fileName, cols, scale):
     return "".join(segs)
 
 # converts an image to colored ascii characters then adds event to result
-def convert(imgFile, frm, tfrm, clms):
+def convert(imgFile, frm, duration_ms, cols):
 	# set scale default as 0.43 which suits
 	# a Courier font
 	scale = 0.43
-
-	# set cols
-	#cols = 40 # 3:30 vids (Bad apple) if you upload your srt file and the subtitle doesn't appear its because the file is too big (5.5 i think is the max)
-	#cols = 56 # 2:00 vids so use less columms if your file is too big
-    #cols = 64 #max res
-	if clms:
-		cols = int(clms)
-	else:
-		print("ERROR"*1000)
-
-	if tfrm == 2:
-		frm -= 1
-		duration_ms = 34
-	else:
-		duration_ms = 33
 
 	segs = convertImageToAscii(imgFile, cols, scale)
 	add_event(frm, duration_ms, segs)

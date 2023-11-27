@@ -1,79 +1,61 @@
-import convert_to_ascii
-import convert_to_png
-import os
-import argparse
-parser = argparse.ArgumentParser(description="mp4 to youtube subtitle json")
-parser.add_argument('--file', dest='file', required=True)
-parser.add_argument('--inputfps', dest='fps', required=True)
-parser.add_argument('--collums', dest='collums', required=True)
-parser.add_argument('--msoffset', dest='msoffset', required=False)
-parser.add_argument('--idoffset', dest='idoffset', required=False)
-args = parser.parse_args()
-if args.file != "":
+import os, argparse, convert_to_ascii, convert_to_png
+
+def read_args():
+    parser = argparse.ArgumentParser(description="mp4 to youtube subtitle json")
+    parser.add_argument('--file',     dest='file',     required=True)
+    parser.add_argument('--inputfps', dest='fps',      required=True)
+    parser.add_argument('--columns',  dest='columns',  required=True)
+    parser.add_argument('--msoffset', dest='msoffset', required=False)
+
+    return parser.parse_args()
+
+def throw(problem):
+    print(problem)
+    exit(1)
+
+def validate_args(args):
+    if int(args.fps) % 30 != 0:       throw("fps input must be a multiple of 30. Terminating.")
+    if not os.path.exists(args.file): throw("file " + args.file + " was not found. Terminating.")
+
+def traverse_temp(num_columns, ms):
+    i = 0
+    triplet_iter = 0
+    while(os.path.exists(f'temp/vids/{i}.png')):
+        temp_png = f'./temp/vids/{i}.png'
+        duration_ms = 34 if triplet_iter == 2 else 33
+
+        convert_to_ascii.convert(temp_png, ms, duration_ms, num_columns)
+
+        # 33.333333 milliseconds would be a frame so every third frame we make it 34 ms (33+33+34=100)
+        triplet_iter = (triplet_iter + 1) % 3
+
+        ms += 34 if triplet_iter == 2 else 33
+
+        os.remove(f'temp/vids/{i}.png')
+        i += 1
+
+if '__main__' == __name__:
+    args = read_args()
+    validate_args(args)
+
     file = args.file
-else:
-    print("no file")
-    exit()
+    fps = int(args.fps)
+    fpsdiv = fps / 30
+    ms = 0 if args.msoffset == None else int(args.msoffset)
+    num_columns = int(args.columns)
+    '''
+    num_columns =
+	40 ---- 3:30 vids (Bad apple) if you upload your srt file and the subtitle
+            doesn't appear its because the file is too big (5.5 i think is the max)
+	56 ---- 2:00 vids so use less columms if your file is too big
+    64 ---- max res
+    '''
 
-if args.fps != "":
-    if int(args.fps) % 30 == 0:
-        fps = int(args.fps)#your fps (only works with 30 60 90 120...) output is always 30 fps
-    else:
-        print("you can only use 30, 60, 90, ... fps")
-        exit()
-else:
-        print("you need to set an fps")
-        exit()
+    print("Extracting pngs from video " + file + " . . .")
+    convert_to_png.convert(file, fpsdiv)
 
+    print('Generating Ascii art')
+    traverse_temp(num_columns, ms)
 
-fpsdiv = fps / 30
-
-#Janky Code - it's not that janky dw
-files = 0
-print("Extracting pngs from video . . .")
-if os.path.exists(file):
-    convert_to_png.convert(file,fpsdiv)
-else:
-    print("found no file at that location")
-    exit()
-while(True):
-    if (os.path.exists(f'temp/vids/{files}.png')):
-        files += 1
-    else:
-        break
-
-# idk wtf this is doing and i'm too tired to think about it
-if args.idoffset != "":
-    idoffset = args.idoffset
-else:
-    idoffset = 0
-if args.msoffset != "":
-    milisecondsoffset = args.msoffset
-else:
-    milisecondsoffset = 0
-
-frm = 1
-id = 0
-print('Generating Ascii art')
-for x in range(files):
-    convert_to_ascii.convert(f'./temp/vids/{x}.png', int(id+int(milisecondsoffset)), frm, args.collums)
-    frm += 1
-    # 33.333333 milliseconds would be a frame so every third frame we make it 34 ms (33+33+34=100)
-    if frm == 3:
-        frm = 0
-    if frm == 2:
-        id += 34
-    else:
-        id += 33
-
-#write to file
-convert_to_ascii.export()
-
-#remove all temporary files
-id = 0
-while(True):
-    if (os.path.exists(f'temp/vids/{id}.png')):
-        os.remove(f'temp/vids/{id}.png')
-    else:
-        break
-    id += 1
+    # finalize .ytt and write to output
+    convert_to_ascii.export()
