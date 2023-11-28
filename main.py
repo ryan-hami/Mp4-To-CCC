@@ -2,10 +2,10 @@ import os, argparse, convert_to_ascii, cv2
 from PIL import Image
 
 def read_args():
-    parser = argparse.ArgumentParser(description="mp4 to youtube subtitle json")
-    parser.add_argument('--file',     dest='file',     required=True)
-    parser.add_argument('--columns',  dest='columns',  required=True)
-    parser.add_argument('--msoffset', dest='msoffset', required=False)
+    parser = argparse.ArgumentParser(description=".mp4 to .ytt")
+    parser.add_argument('--file',    dest='file',    required=True)
+    parser.add_argument('--columns', dest='columns', required=True)
+    parser.add_argument('--startms', dest='startms', required=False)
 
     return parser.parse_args()
 
@@ -18,31 +18,34 @@ def print_progress_bar(iteration, total):
     progress = f"Progress: {iteration}/{total} - {percent}%"
     print(progress, end='\r', flush=True)
 
+def capture_frames(frames):
+    video = cv2.VideoCapture(file)
+    fps = video.get(cv2.CAP_PROP_FPS)
+
+    video.set(cv2.CAP_PROP_POS_MSEC, startms)
+
+    while True:
+        ret, frame = video.read()
+        if not ret: break
+        frames.append(Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
+
+    video.release()
+
+    return fps
+
 if '__main__' == __name__:
     args = read_args()
     if not os.path.exists(args.file): throw("file " + args.file + " was not found. Terminating.")
 
     file = args.file
-    msoffset = int(args.msoffset or 0)
+    startms = int(args.startms or 0)
     num_columns = int(args.columns)
 
     print("Extracting pngs from video " + file + " . . .")
 
-    cam = cv2.VideoCapture(file)
-    fps = cam.get(cv2.CAP_PROP_FPS)
-    mspf = 1000 / fps
-
-    cam.set(cv2.CAP_PROP_POS_MSEC, msoffset)
-
     frames = []
-
-    while True:
-        ret, frame = cam.read()
-        if not ret: break
-        frames.append(Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
-
-    cam.release()
-
+    fps = capture_frames(frames)
+    mspf = 1000 / fps
     num_frames = len(frames)
 
     print('Generating ASCII art')

@@ -43,6 +43,6 @@ python3 main.py --file "./wobble.mp4" --columns 40
 
 |Argument|Rquired|Description|
 |----|-----|-------|
-|--file|Yes|Your input mp4 file|
-|--columns|Yes|How many characters Per Row|
-|--msoffset|No|After How many milliseconds into the video should the animation start|
+|--file|Yes|mp4 file to process|
+|--columns|Yes|number of characters per row|
+|--startms|No|how far in ms into the video to start|
