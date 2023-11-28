@@ -13,11 +13,6 @@ def throw(problem):
     print(problem)
     exit(1)
 
-def validate_args(args):
-    # if int(args.fps) % 30 != 0:       throw("fps input must be a multiple of 30. Terminating.")
-    if not os.path.exists(args.file): throw("file " + args.file + " was not found. Terminating.")
-
-
 def print_progress_bar(iteration, total):
     percent = "{:.1f}".format(100 * (iteration / float(total)))
     progress = f"Progress: {iteration}/{total} - {percent}%"
@@ -25,18 +20,11 @@ def print_progress_bar(iteration, total):
 
 if '__main__' == __name__:
     args = read_args()
-    validate_args(args)
+    if not os.path.exists(args.file): throw("file " + args.file + " was not found. Terminating.")
 
     file = args.file
     msoffset = int(args.msoffset or 0)
     num_columns = int(args.columns)
-    '''
-    num_columns =
-	40 ---- 3:30 vids (Bad apple) if you upload your srt file and the subtitle
-            doesn't appear its because the file is too big (5.5 i think is the max)
-	56 ---- 2:00 vids so use less columms if your file is too big
-    64 ---- max res
-    '''
 
     print("Extracting pngs from video " + file + " . . .")
 

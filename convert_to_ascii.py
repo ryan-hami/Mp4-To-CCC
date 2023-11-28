@@ -1,6 +1,4 @@
 import numpy as np
-from PIL import Image
-from random import shuffle
 
 avg_to_char = ['$', '8', 'o', 'b', 'd', 'p', 'q', '0', 'L', 'u', 'n', '1', '+', '" ', '` ']
 
