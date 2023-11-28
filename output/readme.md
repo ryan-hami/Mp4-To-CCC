@@ -1,1 +1,0 @@
-## The subtitles.ytt file is exported here.
