@@ -28,13 +28,13 @@ if you have python setup do
 
 ## Example
 ```
-python3 main.py --file "./wobble.mp4" --inputfps 30 --columns 40
+python3 main.py --file "./wobble.mp4" --fps 30 --columns 40
 ```
 ## What do The Arguments mean
 
 |Argument|Rquired|Description|
 |----|-----|-------|
 |--file|Yes|Your input mp4 file|
-|--inputfps|Yes|The fps of your input Video (it only works for 30, 60, 90...)|
+|--fps|Yes|The fps of your input Video (it only works for 30, 60, 90...)|
 |--columns|Yes|How many characters Per Row|
 |--msoffset|No|After How many milliseconds should the animation start|

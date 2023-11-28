@@ -2,8 +2,8 @@ import os, argparse, convert_to_ascii, convert_to_png
 
 def read_args():
     parser = argparse.ArgumentParser(description="mp4 to youtube subtitle json")
+    parser.add_argument('--fps',      dest='fps',      required=True)
     parser.add_argument('--file',     dest='file',     required=True)
-    parser.add_argument('--inputfps', dest='fps',      required=True)
     parser.add_argument('--columns',  dest='columns',  required=True)
     parser.add_argument('--msoffset', dest='msoffset', required=False)
 
@@ -41,7 +41,7 @@ if '__main__' == __name__:
     file = args.file
     fps = int(args.fps)
     fpsdiv = fps / 30
-    ms = 0 if args.msoffset == None else int(args.msoffset)
+    ms = int(args.msoffset or 0)
     num_columns = int(args.columns)
     '''
     num_columns =

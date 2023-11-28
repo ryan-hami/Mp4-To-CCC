@@ -1,7 +1,7 @@
-# Python code to convert an image to ASCII image. AI comment?
 import numpy as np
-
 from PIL import Image
+
+avg_to_char = ['$', '8', 'o', 'b', 'd', 'p', 'q', '0', 'L', 'u', 'n', '1', '+', '" ', '` ']
 
 events = []
 pens = [ "#FFFFFF" ]
@@ -30,109 +30,76 @@ def segment(color, utf8_text): return f'<s p="{color_to_id(color)}">{utf8_text}<
 # export the subtitles as .ytt
 def export(): open("output/subtitles.ytt", "w").write(f'<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><head>{"".join(pens[1:])}</head><body>{"".join(events)}</body></timedtext>')
 
-# 10 levels of grey
-gscale2 = '$8obdpq0Lun1+"`'
+def avg_color(img):
+    width, height = img.size
+    pixels = img.load()
 
-def getAverageL(image):
+    total_r, total_g, total_b = 0, 0, 0
 
-	"""
-	Given PIL Image, return average value of grayscale value
-	"""
-	# get image as numpy array
-	im = np.array(image)
+    for x in range(width):
+        for y in range(height):
+            r, g, b = pixels[x, y]
+            total_r += r
+            total_g += g
+            total_b += b
 
-	# get shape
-	w,h = im.shape
+    num_pixels = width * height
+    avg_r = total_r // num_pixels
+    avg_g = total_g // num_pixels
+    avg_b = total_b // num_pixels
 
-	# get average
-	return np.average(im.reshape(w*h))
-
-def getEqualWidthScale(scale, width):
-    equal_width_scale = ""
-    for char in scale:
-        equal_width_scale += char + " " * (width - 1)
-    return equal_width_scale
+    return (avg_r, avg_g, avg_b)
 
 def convertImageToAscii(fileName, cols, scale):
-    """
-    Given Image and dims (rows, cols) returns an m*n list of Images 
-    """
-    # declare globals
-    global gscale2
-
     pil_image = Image.open(fileName)
 
     # open image and convert to grayscale
     image = pil_image.convert('L')
 
     # store dimensions
-    W, H = image.size[0], image.size[1]
-    #print("input image dims: %d x %d" % (W, H))
+    W, H = pil_image.width, pil_image.height
 
-    # compute width of tile
-    w = W / cols
-
-    # compute tile height based on aspect ratio and scale
-    h = w / scale
+    # store delta dimensions
+    dw = W / cols
+    dh = dw / scale
 
     # compute number of rows
-    rows = int(H / h)
-
-    #print("cols: %d, rows: %d" % (cols, rows))
-    #print("tile dims: %d x %d" % (w, h))
+    rows = int(H / dh)
 
     # check if image size is too small
     if cols > W or rows > H:
         print("Image too small for specified cols!")
-        exit(0)
+        exit(1)
 
     # ascii image is a list of character strings
     segs = []
 
-    # j outer, i inner for loop ... you are a monster...
-    # generate list of dimensions
-    for j in range(rows):
-        y1 = int(j * h)
-        y2 = int((j + 1) * h)
+    # traverse image as quads
+    for row in range(rows):
+        y1 = row * dh
+        y2 = y1 + dh
 
-        # correct last tile
-        if j == rows - 1:
-            y2 = H
-
-        for i in range(cols):
-            # crop image to tile
-            x1 = int(i * w)
-            x2 = int((i + 1) * w)
-
-            # correct last tile
-            if i == cols - 1:
-                x2 = W
+        for col in range(cols):
+            x1 = col * dw
+            x2 = x1 + dw
 
             # crop image to extract tile
-            img = image.crop((x1, y1, x2, y2))
+            seg_grey = image.crop((x1, y1, x2, y2))
+            seg_color = pil_image.crop((x1, y1, x2, y2))
 
-            # get average luminance
-            avg = int(getAverageL(img))
+            # max bright minus average luminescence
+            luminosity = 255 - int(np.average(seg_grey))
 
-            # look up ascii char
-            gsval = gscale2[int(((255-avg) * 14) / 255)]
-            if gsval == '"':
-                gsval = '" '
-            elif gsval == "`":
-                gsval = "` "
-
-            # get center pixel of segment
-            mx = x1 + (x2 - x1) // 2
-            my = y1 + (y2 - y1) // 2
-            pixel = pil_image.getpixel((mx, my))
+            # look up ascii char from avg of greyscaled image
+            char = avg_to_char[luminosity * 14 // 255]
 
             # convert rgb tuple to hex string
-            hex_string = '#{:02X}{:02X}{:02X}'.format(*pixel)
+            hex_string = '#{:02X}{:02X}{:02X}'.format(*avg_color(seg_color))
 
-            # append segment as char and color
-            segs.append(segment(hex_string, gsval))
+            segs.append(segment(hex_string, char))
+
         # end of line, append new line character
-        if (j != rows - 1): segs.append('&#xA;')
+        if (row != rows - 1): segs.append('&#xA;')
 
     # return txt image
     return "".join(segs)
