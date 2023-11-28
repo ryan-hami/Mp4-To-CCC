@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+from random import shuffle
 
 avg_to_char = ['$', '8', 'o', 'b', 'd', 'p', 'q', '0', 'L', 'u', 'n', '1', '+', '" ', '` ']
 
@@ -28,7 +29,13 @@ def add_event(start_ms, duration_ms, segs): events.append(f'<p t="{start_ms}" d=
 def segment(color, utf8_text): return f'<s p="{color_to_id(color)}">{utf8_text}</s>'
 
 # export the subtitles as .ytt
-def export(): open("output/subtitles.ytt", "w").write(f'<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><head>{"".join(pens[1:])}</head><body>{"".join(events)}</body></timedtext>')
+def export():
+    list1 = pens[1:]
+    list2 = events
+
+    shuffle(list1)
+    shuffle(list2)
+    open("output/subtitles.ytt", "w").write(f'<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><head>{"".join(list1)}</head><body>{"".join(list2)}</body></timedtext>')
 
 def avg_color(img):
     width, height = img.size
@@ -50,10 +57,8 @@ def avg_color(img):
 
     return (avg_r, avg_g, avg_b)
 
-def convertImageToAscii(fileName, cols, scale):
-    pil_image = Image.open(fileName)
-
-    # open image and convert to grayscale
+def convertImageToAscii(pil_image, cols, scale):
+    # convert to grayscale
     image = pil_image.convert('L')
 
     # store dimensions
@@ -105,10 +110,10 @@ def convertImageToAscii(fileName, cols, scale):
     return "".join(segs)
 
 # converts an image to colored ascii characters then adds event to result
-def convert(imgFile, frm, duration_ms, cols):
+def convert(frame, frm, duration_ms, cols):
 	# set scale default as 0.43 which suits
 	# a Courier font
 	scale = 0.43
 
-	segs = convertImageToAscii(imgFile, cols, scale)
+	segs = convertImageToAscii(frame, cols, scale)
 	add_event(frm, duration_ms, segs)

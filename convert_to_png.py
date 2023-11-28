@@ -1,36 +1,16 @@
-# Importing all necessary libraries 
+from PIL import Image
 import cv2
 
-def convert(vidfile, fpsdiv):
-    # Read the video from specified path 
-    cam = cv2.VideoCapture(vidfile) 
+def convert(file):
+    cam = cv2.VideoCapture(file)
 
-    # Get the total number of frames in the video
-    total_frames = int(cam.get(cv2.CAP_PROP_FRAME_COUNT))
+    frames = []
 
-    # frame 
-    currentframe = 0
+    while True:
+        ret, frame = cam.read()
+        if not ret: break
+        frames.append(frame)
 
-    while currentframe < total_frames: 
-        # Set the frame position
-        cam.set(cv2.CAP_PROP_POS_FRAMES, currentframe)
+    cam.release()
 
-        # reading from frame 
-        ret, frame = cam.read() 
-
-        if ret: 
-            # if video is still left continue creating images 
-            name = './temp/vids/' + str(int(currentframe/fpsdiv)) + '.png'#converts 60 fps to 30 fps
-
-            # writing the extracted images 
-            cv2.imwrite(name,frame)
-
-            # increasing counter so that it will 
-            # show how many frames are created 
-            currentframe += fpsdiv
-
-        else: 
-            break
-    # Release all space and windows once done 
-    cam.release() 
-    cv2.destroyAllWindows() 
+    return [Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)) for frame in frames]

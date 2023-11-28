@@ -17,22 +17,18 @@ def validate_args(args):
     if int(args.fps) % 30 != 0:       throw("fps input must be a multiple of 30. Terminating.")
     if not os.path.exists(args.file): throw("file " + args.file + " was not found. Terminating.")
 
-def traverse_temp(num_columns, ms):
-    i = 0
+def traverse_temp(num_columns, ms, frames):
     triplet_iter = 0
-    while(os.path.exists(f'temp/vids/{i}.png')):
-        temp_png = f'./temp/vids/{i}.png'
+    for frame in frames:
         duration_ms = 34 if triplet_iter == 2 else 33
 
-        convert_to_ascii.convert(temp_png, ms, duration_ms, num_columns)
+        convert_to_ascii.convert(frame, ms, duration_ms, num_columns)
 
         # 33.333333 milliseconds would be a frame so every third frame we make it 34 ms (33+33+34=100)
         triplet_iter = (triplet_iter + 1) % 3
 
         ms += 34 if triplet_iter == 2 else 33
 
-        os.remove(f'temp/vids/{i}.png')
-        i += 1
 
 if '__main__' == __name__:
     args = read_args()
@@ -40,6 +36,7 @@ if '__main__' == __name__:
 
     file = args.file
     fps = int(args.fps)
+    mspf = 1000 / fps
     fpsdiv = fps / 30
     ms = int(args.msoffset or 0)
     num_columns = int(args.columns)
@@ -52,10 +49,10 @@ if '__main__' == __name__:
     '''
 
     print("Extracting pngs from video " + file + " . . .")
-    convert_to_png.convert(file, fpsdiv)
+    frames = convert_to_png.convert(file)
 
     print('Generating Ascii art')
-    traverse_temp(num_columns, ms)
+    traverse_temp(num_columns, ms, frames)
 
     # finalize .ytt and write to output
     convert_to_ascii.export()
