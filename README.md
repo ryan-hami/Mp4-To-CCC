@@ -1,4 +1,6 @@
-# Info
+# Mp4-To-CCC - Convert .mp4's to Colored Closed Captions for YouTube
+
+## Info
 Fork of [Mp4-To-Srt](https://github.com/Nachtwind1/Mp4-To-Srt). This adds color from the video into the closed captions.
 
 Originally I exported the closed captions as json because looking at how YouTube stores subtitles internally they are json files. Specifically I used this video as reference: [rainbow caption video](https://youtu.be/Cc2nkx77U24). You can get the subtitles by opening the Network tab of Inspect, and filtering for the `youtube.com/api/timedtext` request. Having done some research, they now export as `.ytt`, but it is a little buggier.
@@ -9,32 +11,36 @@ The wobble video is a recording of the famous gif then I just used ffmpeg to cro
 
 [Demo of result](https://youtu.be/9-oYx9Scd7g)
 
-# Mp4-To-CCC
-A Python Programm That Converts Mp4 files to Colored Closed Captions for YouTube
-
-# How to use
-
 ## Requirements
 
-python3, opencv-python, pillow, numpy
+* opencv-python
+* pillow
+* numpy
 
 ### How to install
+1. Setup python3
 
-#### [Python](https://www.python.org/downloads/)
-
-if you have python setup do
-
-#### python3 -m pip install \<dependency\>
-
-## Example
+2. If you have python3 setup, paste this into terminal.
 ```
-python3 main.py --file "./wobble.mp4" --fps 30 --columns 40
+python3 -m pip install opencv-python
+python3 -m pip install pillow
+python3 -m pip install numpy
 ```
+
+## Usage
+Run main.py with python3 and pass in your desired arguments. The video will be processed and a `.ytt` captions file will be generated in /output/subtitles.ytt
+
+This file can be uploaded directly to a youtube video as closed captions.
+
+### Example: 
+```
+python3 main.py --file "./wobble.mp4" --columns 40
+```
+
 ## What do The Arguments mean
 
 |Argument|Rquired|Description|
 |----|-----|-------|
 |--file|Yes|Your input mp4 file|
-|--fps|Yes|The fps of your input Video (it only works for 30, 60, 90...)|
 |--columns|Yes|How many characters Per Row|
-|--msoffset|No|After How many milliseconds should the animation start|
+|--msoffset|No|After How many milliseconds into the video should the animation start|
