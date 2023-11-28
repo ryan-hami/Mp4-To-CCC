@@ -61,4 +61,4 @@ if '__main__' == __name__:
         convert_to_ascii.convert(i, frame, mspf, num_columns, num_rows, tile_width, tile_height)
 
     # finalize .ytt and write to output
-    convert_to_ascii.export()
+    convert_to_ascii.export(file[:file.rfind(".")])

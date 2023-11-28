@@ -27,7 +27,7 @@ def add_event(start_ms, duration_ms, segs): events.append(f'<p t="{start_ms}" d=
 def segment(color, utf8_text): return f'<s p="{color_to_id(color)}">{utf8_text}</s>'
 
 # export the subtitles as .ytt
-def export(): open("output/subtitles.ytt", "w").write(f'<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><head>{"".join(pens[1:])}</head><body>{"".join(events)}</body></timedtext>')
+def export(name): open(f"output/{name}.ytt", "w").write(f'<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><head>{"".join(pens[1:])}</head><body>{"".join(events)}</body></timedtext>')
 
 def avg_color(img):
     width, height = img.size

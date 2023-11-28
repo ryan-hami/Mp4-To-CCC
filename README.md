@@ -3,7 +3,7 @@
 ## Info
 Fork of [Mp4-To-Srt](https://github.com/Nachtwind1/Mp4-To-Srt). This adds color from the video into the closed captions.
 
-Initially I just wanted to add color support then make a pull request, but at this point I don't think there's a line of code I haven't rewritten, so it has been detached. Also the original version constructs captions that render much faster, so it would be a disservice to implement these additions. Furthermore, this script is written for a different file format entirely which drastically changes how it is used.
+Initially I just wanted to add color support then make a pull request, but at this point I don't think there's a line of code I haven't rewritten, so it has been detached. Also the original version constructs and render much faster, so it would be a disservice to implement these additions. Furthermore, this script is written for a different file format entirely which drastically changes how it is used.
 
 Originally I exported the closed captions as json because looking at how YouTube stores subtitles internally they are json files. Specifically I used this video as reference: [rainbow caption video](https://youtu.be/Cc2nkx77U24). You can get the subtitles by opening the Network tab of Inspect, and filtering for the `youtube.com/api/timedtext` request. Having done some research, they now export as `.ytt`, but it is a little buggier.
 
@@ -30,7 +30,9 @@ python3 -m pip install numpy
 ```
 
 ## Usage
-Run main.py with python3 and pass in your desired arguments. The video will be processed and a `.ytt` captions file will be generated in /output/subtitles.ytt
+Run main.py with python3 and pass in your desired arguments.
+
+The video will be processed and a `.ytt` captions file will be generated in /output/{name}.ytt
 
 This file can be uploaded directly to a youtube video as closed captions.
 
