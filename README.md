@@ -29,11 +29,11 @@ python3 -m pip install opencv-python pillow numpy
 ```
 
 ## Usage
-> Run main.py with *python3 and pass in your desired arguments.
->
-> The video will be processed and a `.ytt` captions file will be generated in `/output/{name}.ytt`
->
-> This file can be uploaded directly to a youtube video as closed captions.
+Run main.py with *python3 and pass in your desired arguments.
+
+The video will be processed and a `.ytt` captions file will be generated in `/output/{name}.ytt`
+
+This file can be uploaded directly to a youtube video as closed captions.
 
 ### Example:
 
