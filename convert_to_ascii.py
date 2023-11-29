@@ -31,6 +31,7 @@ def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):
     # characters (with color / segments) in the subtitle event (frame as ascii)
     segs = []
 
+    # storage vars for concatenating consecutive, same-color characters into the same segment  
     cur_color = ''
     utf8 = []
 
@@ -72,11 +73,14 @@ def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):
     start_ms = round(index * mspf)
     duration = round(mspf)
 
+    # are there are any entries in the segments array
     if len(segs):
+        # append the hanging segment in utf8
         segs.append(segment(cur_color, "".join(utf8)))
         text = "".join(segs)
         events.append(f'<p t="{start_ms}" d="{duration}">{text}</p>')
     else:
         id = color_to_id(cur_color)
         text = "".join(utf8)
+        # in-line the pen id for a single-color entry (forgo the segment wrapping)
         events.append(f'<p t="{start_ms}" d="{duration}" p="{id}">{text}</p>')
