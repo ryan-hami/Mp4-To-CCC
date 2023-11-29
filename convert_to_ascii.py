@@ -54,6 +54,9 @@ def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):
     # characters (with color / segments) in the subtitle event (frame as ascii)
     segs = []
 
+    cur_color = ''
+    utf8 = []
+
     # traverse image as quads
     for row in range(num_rows):
         y1 = row * dh
@@ -76,9 +79,15 @@ def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):
             # convert rgb tuple to hex string
             hex_string = '#{:02X}{:02X}{:02X}'.format(*avg_color(tile))
 
-            segs.append(segment(hex_string, char))
+            if cur_color != hex_string:
+                if len(utf8): segs.append(segment(cur_color, "".join(utf8)))
+                cur_color = hex_string
+                utf8.clear()
+
+            utf8.append(char)
 
         # end of line, append new line character
-        if (row != num_rows - 1): segs.append('&#xA;')
+        if (row != num_rows - 1): utf8.append('&#xA;')
+    segs.append(segment(cur_color, "".join(utf8)))
 
     add_event(index * mspf, mspf, "".join(segs))
