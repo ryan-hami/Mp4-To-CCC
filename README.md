@@ -1,6 +1,6 @@
 # Mp4-To-CCC - Convert .mp4's to Colored Closed Captions for YouTube
 
-## Info
+> ## Info
 > Fork of [Mp4-To-Srt](https://github.com/Nachtwind1/Mp4-To-Srt). This adds color from the video into the closed captions.
 >
 > Initially I just wanted to add *color support* then make a **pull request**, but at this point I don't think there's a line of code I haven't rewritten, so it has been detached. Also the original version *constructs and renders the captions much faster, so it would be a disservice to implement these changes. Furthermore, this script is written for a different file format entirely which changes how it is used.
