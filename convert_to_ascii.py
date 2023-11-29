@@ -30,24 +30,7 @@ def segment(color, utf8_text): return f'<s p="{color_to_id(color)}">{utf8_text}<
 def export(name): open(f"output/{name}.ytt", "w").write(f'<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><head>{"".join(pens[1:])}</head><body>{"".join(events)}</body></timedtext>')
 
 def avg_color(img):
-    width, height = img.size
-    pixels = img.load()
-
-    total_r, total_g, total_b = 0, 0, 0
-
-    for x in range(width):
-        for y in range(height):
-            r, g, b = pixels[x, y]
-            total_r += r
-            total_g += g
-            total_b += b
-
-    num_pixels = width * height
-    avg_r = total_r // num_pixels
-    avg_g = total_g // num_pixels
-    avg_b = total_b // num_pixels
-
-    return (avg_r, avg_g, avg_b)
+    return img.resize((1, 1)).getpixel((0, 0))
 
 # converts an image to colored ascii characters then adds event to result
 def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):

@@ -1,4 +1,4 @@
-import os, argparse, convert_to_ascii, cv2
+import os, argparse, convert_to_ascii, cv2#, cProfile
 from PIL import Image
 
 def read_args():
@@ -60,6 +60,9 @@ if '__main__' == __name__:
         tile_width = frame.width / num_columns
         num_rows = round(0.43 * frame.height / tile_width)
         tile_height = frame.height / num_rows
+
+        #cProfile.run('convert_to_ascii.convert(i, frame, mspf, num_columns, num_rows, tile_width, tile_height)')
+        #print('\n\n')
 
         convert_to_ascii.convert(i, frame, mspf, num_columns, num_rows, tile_width, tile_height)
     print()
