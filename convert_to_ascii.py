@@ -73,4 +73,4 @@ def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):
         if (row != num_rows - 1): utf8.append('&#xA;')
     segs.append(segment(cur_color, "".join(utf8)))
 
-    add_event(index * mspf, mspf, "".join(segs))
+    add_event(round(index * mspf), round(mspf), "".join(segs))
