@@ -20,17 +20,11 @@ def color_to_id(color):
 
     return id
 
-# append a subtitle to the events list
-def add_event(start_ms, duration_ms, segs): events.append(f'<p t="{start_ms}" d="{duration_ms}">{segs}</p>')
-
 # return a segment
 def segment(color, utf8_text): return f'<s p="{color_to_id(color)}">{utf8_text}</s>'
 
 # export the subtitles as .ytt
 def export(name): open(f"output/{name}.ytt", "w").write(f'<?xml version="1.0" encoding="utf-8" ?><timedtext format="3"><head>{"".join(pens[1:])}</head><body>{"".join(events)}</body></timedtext>')
-
-def avg_color(img):
-    return img.resize((1, 1)).getpixel((0, 0))
 
 # converts an image to colored ascii characters then adds event to result
 def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):
@@ -59,8 +53,11 @@ def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):
             # look up ascii char from avg of greyscaled image
             char = avg_to_char[luminosity * 14 // 255]
 
+            # average color
+            avg = tile.resize((1, 1)).getpixel((0, 0))
+
             # convert rgb tuple to hex string
-            hex_string = '#{:02X}{:02X}{:02X}'.format(*avg_color(tile))
+            hex_string = '#{:02X}{:02X}{:02X}'.format(*avg)
 
             if cur_color != hex_string:
                 if len(utf8): segs.append(segment(cur_color, "".join(utf8)))
@@ -71,6 +68,15 @@ def convert(index, pil_image, mspf, num_columns, num_rows, dw, dh):
 
         # end of line, append new line character
         if (row != num_rows - 1): utf8.append('&#xA;')
-    segs.append(segment(cur_color, "".join(utf8)))
 
-    add_event(round(index * mspf), round(mspf), "".join(segs))
+    start_ms = round(index * mspf)
+    duration = round(mspf)
+
+    if len(segs):
+        segs.append(segment(cur_color, "".join(utf8)))
+        text = "".join(segs)
+        events.append(f'<p t="{start_ms}" d="{duration}">{text}</p>')
+    else:
+        id = color_to_id(cur_color)
+        text = "".join(utf8)
+        events.append(f'<p t="{start_ms}" d="{duration}" p="{id}">{text}</p>')
